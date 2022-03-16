@@ -1,4 +1,6 @@
 import json
+import time
+
 from dateutil.parser import parse as dateutil_parser
 
 from datadog_api_client.v2 import ApiClient, ApiException, Configuration
@@ -24,7 +26,7 @@ with ApiClient(configuration) as api_client:
     filter_query = "*"  # str | Search query following logs syntax. (optional)
     filter_index = "main"  # str | For customers with multiple indexes, the indexes to search Defaults to '*' which means all indexes (optional)
     filter_from = dateutil_parser('2022-03-08T11:48:36+01:00')  # datetime | Minimum timestamp for requested logs. (optional)
-    filter_to = dateutil_parser('2022-03-08T15:55:36+01:00')  # datetime | Maximum timestamp for requested logs. (optional)
+    filter_to = dateutil_parser('2022-03-08T11:55:36+01:00')  # datetime | Maximum timestamp for requested logs. (optional)
     sort = LogsSort("timestamp")  # LogsSort | Order of logs in results. (optional)
     page_limit = 1000  # int | Maximum number of logs in the response. (optional) if omitted the server will use the default value of 10
 
@@ -32,16 +34,22 @@ with ApiClient(configuration) as api_client:
         api_response = api_instance.list_logs_get(filter_query=filter_query, filter_index=filter_index, filter_from=filter_from, filter_to=filter_to, sort=sort, page_limit=page_limit)
         log_filename = str(filter_from) + "-" + str(filter_to) + ".json"
         f = open("data/" + log_filename, "a")
-        f.write(str(api_response["data"]))
+        for log in api_response["data"]:
+            f.write(json.dumps(str(log)))
+            f.write("\n")
         f.close()
+        time.sleep(1)
 
         while "meta" in api_response:
             i = 0
             api_response = api_instance.list_logs_get(filter_query=filter_query, filter_index=filter_index, filter_from=filter_from, filter_to=filter_to, sort=sort, page_cursor=api_response["meta"]["page"]["after"], page_limit=page_limit)
             log_filename = str(filter_from) + "-" + str(filter_to) + "-" + str(i) + ".json"
             f = open("data/" + log_filename, "a")
-            f.write(str(api_response["data"]))
+            for log in api_response["data"]:
+                f.write(json.dumps(str(log)))
+                f.write("\n")
             f.close()
+            time.sleep(1)
             i = i+1
 
     except ApiException as e:
