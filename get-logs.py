@@ -26,7 +26,7 @@ with ApiClient(configuration) as api_client:
     filter_from = dateutil_parser('2022-03-08T11:48:36+01:00')  # datetime | Minimum timestamp for requested logs. (optional)
     filter_to = dateutil_parser('2022-03-08T15:55:36+01:00')  # datetime | Maximum timestamp for requested logs. (optional)
     sort = LogsSort("timestamp")  # LogsSort | Order of logs in results. (optional)
-    page_limit = 10  # int | Maximum number of logs in the response. (optional) if omitted the server will use the default value of 10
+    page_limit = 1000  # int | Maximum number of logs in the response. (optional) if omitted the server will use the default value of 10
 
     try:        
         api_response = api_instance.list_logs_get(filter_query=filter_query, filter_index=filter_index, filter_from=filter_from, filter_to=filter_to, sort=sort, page_limit=page_limit)
