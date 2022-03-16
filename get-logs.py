@@ -1,6 +1,7 @@
 import json
 import time
 import os.path
+import re
 
 from dateutil.parser import parse as dateutil_parser
 
@@ -21,6 +22,15 @@ configuration = Configuration()
 
 log_filename = ""
 
+def save_logs(filename, response):
+    filename = re.sub('[^A-Za-z0-9-.]+', '', filename)
+    log_filename_path = os.path.join("data", filename)
+    f = open(log_filename_path, "a")
+    for log in response["data"]:
+        f.write(json.dumps(str(log)))
+        f.write("\n")
+    f.close()
+
 with ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = LogsApi(api_client)
@@ -33,25 +43,15 @@ with ApiClient(configuration) as api_client:
 
     try:        
         api_response = api_instance.list_logs_get(filter_query=filter_query, filter_index=filter_index, filter_from=filter_from, filter_to=filter_to, sort=sort, page_limit=page_limit)
-        log_filename = str(filter_from) + "-" + str(filter_to) + ".json"
-        log_filename_path = os.path.join("data", log_filename)
-        f = open(log_filename_path, "a")
-        for log in api_response["data"]:
-            f.write(json.dumps(str(log)))
-            f.write("\n")
-        f.close()
+        log_filename = str(filter_from) + ".json"
+        save_logs(log_filename, api_response)
         time.sleep(1)
 
         while "meta" in api_response:
             i = 0
             api_response = api_instance.list_logs_get(filter_query=filter_query, filter_index=filter_index, filter_from=filter_from, filter_to=filter_to, sort=sort, page_cursor=api_response["meta"]["page"]["after"], page_limit=page_limit)
-            log_filename = str(filter_from) + "-" + str(filter_to) + "-" + str(i) + ".json"
-            log_filename_path = os.path.join("data", log_filename)
-            f = open(log_filename_path, "a")
-            for log in api_response["data"]:
-                f.write(json.dumps(str(log)))
-                f.write("\n")
-            f.close()
+            log_filename = str(filter_from) + "-" + str(i) + ".json"
+            save_logs(log_filename, api_response)
             time.sleep(1)
             i = i+1
 
