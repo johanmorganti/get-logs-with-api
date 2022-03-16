@@ -1,5 +1,6 @@
 import json
 import time
+import os.path
 
 from dateutil.parser import parse as dateutil_parser
 
@@ -33,7 +34,8 @@ with ApiClient(configuration) as api_client:
     try:        
         api_response = api_instance.list_logs_get(filter_query=filter_query, filter_index=filter_index, filter_from=filter_from, filter_to=filter_to, sort=sort, page_limit=page_limit)
         log_filename = str(filter_from) + "-" + str(filter_to) + ".json"
-        f = open("data/" + log_filename, "a")
+        log_filename_path = os.path.join("data", log_filename)
+        f = open(log_filename_path, "a")
         for log in api_response["data"]:
             f.write(json.dumps(str(log)))
             f.write("\n")
@@ -44,7 +46,8 @@ with ApiClient(configuration) as api_client:
             i = 0
             api_response = api_instance.list_logs_get(filter_query=filter_query, filter_index=filter_index, filter_from=filter_from, filter_to=filter_to, sort=sort, page_cursor=api_response["meta"]["page"]["after"], page_limit=page_limit)
             log_filename = str(filter_from) + "-" + str(filter_to) + "-" + str(i) + ".json"
-            f = open("data/" + log_filename, "a")
+            log_filename_path = os.path.join("data", log_filename)
+            f = open(log_filename_path, "a")
             for log in api_response["data"]:
                 f.write(json.dumps(str(log)))
                 f.write("\n")
